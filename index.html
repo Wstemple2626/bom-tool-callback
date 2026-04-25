@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DS Electronics — DigiKey Auth</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4fa; }
+  .box { text-align: center; background: white; padding: 40px 48px; border-top: 4px solid #004AAD; }
+  .logo { font-size: 22px; font-weight: 800; color: #004AAD; margin-bottom: 8px; }
+  .msg { color: #5a7a9a; font-size: 14px; }
+  .success { color: #1a7a4a; font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+  .error { color: #cc0000; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">DS Electronics</div>
+  <div id="status" class="msg">Processing authentication...</div>
+</div>
+<script>
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
+  var error = params.get('error');
+  var statusEl = document.getElementById('status');
+
+  if (error) {
+    statusEl.className = 'error';
+    statusEl.textContent = 'Authentication error: ' + error;
+  } else if (code) {
+    // Send code back to the parent window (the BOM tool)
+    if (window.opener) {
+      window.opener.postMessage({ type: 'digikey_oauth', code: code }, '*');
+      statusEl.className = 'success';
+      statusEl.textContent = '✅ Logged in successfully! This window will close...';
+      setTimeout(function() { window.close(); }, 1000);
+    } else {
+      statusEl.className = 'error';
+      statusEl.textContent = 'Could not communicate with the BOM tool. Please close this window and try again.';
+    }
+  } else {
+    statusEl.className = 'error';
+    statusEl.textContent = 'No authorization code received.';
+  }
+</script>
+</body>
+</html>
